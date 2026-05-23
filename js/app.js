@@ -7,25 +7,34 @@ const state = {
   filters: {
     search: "",
     category: "All",
-    price: "All"
+    price: "All",
   },
-  editingId: null
+  editingId: null,
 };
 
-const categories = ["Vegetables", "Fruits", "Drinks", "Snacks", "Meat & Seafood", "Household items"];
+const categories = [
+  "Vegetables",
+  "Fruits",
+  "Drinks",
+  "Snacks",
+  "Meat & Seafood",
+  "Household items",
+];
 const icons = {
-  "Vegetables": "carrot",
-  "Fruits": "apple",
-  "Drinks": "cup-soda",
-  "Snacks": "cookie",
+  Vegetables: "carrot",
+  Fruits: "apple",
+  Drinks: "cup-soda",
+  Snacks: "cookie",
   "Meat & Seafood": "fish",
-  "Household items": "spray-can"
+  "Household items": "spray-can",
 };
 
 const qs = (selector, scope = document) => scope.querySelector(selector);
-const qsa = (selector, scope = document) => [...scope.querySelectorAll(selector)];
+const qsa = (selector, scope = document) => [
+  ...scope.querySelectorAll(selector),
+];
 const money = (value) => `$${Number(value).toFixed(2)}`;
-const API_BASE = "http://localhost:3000/api";
+const API_BASE = "https://sell-goods-production.up.railway.app/api";
 
 function saveStore() {
   localStorage.setItem("freshcart-cart", JSON.stringify(state.cart));
@@ -53,8 +62,8 @@ async function apiRequest(path, options = {}) {
     headers: {
       "Content-Type": "application/json",
       ...(state.token ? { Authorization: `Bearer ${state.token}` } : {}),
-      ...(options.headers || {})
-    }
+      ...(options.headers || {}),
+    },
   });
   const data = await response.json().catch(() => ({}));
 
@@ -85,7 +94,9 @@ function renderAuthState() {
   const loggedIn = Boolean(state.currentUser);
   qs("#userChip").classList.toggle("hidden", !loggedIn);
   qs("#logoutBtn").classList.toggle("hidden", !loggedIn);
-  qsa(".auth-link").forEach((link) => link.classList.toggle("hidden", loggedIn));
+  qsa(".auth-link").forEach((link) =>
+    link.classList.toggle("hidden", loggedIn),
+  );
 
   if (loggedIn) {
     qs("#userName").textContent = state.currentUser.name;
@@ -95,8 +106,12 @@ function renderAuthState() {
 }
 
 function navigate(pageId) {
-  qsa(".page").forEach((page) => page.classList.toggle("active", page.id === pageId));
-  qsa("[data-page]").forEach((link) => link.classList.toggle("active", link.dataset.page === pageId));
+  qsa(".page").forEach((page) =>
+    page.classList.toggle("active", page.id === pageId),
+  );
+  qsa("[data-page]").forEach((link) =>
+    link.classList.toggle("active", link.dataset.page === pageId),
+  );
   qs("#mobileMenu").classList.remove("open");
   qs("#cartDrawer").classList.remove("open");
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -106,12 +121,18 @@ function navigate(pageId) {
 // Centralized product filtering keeps search, category, and price controls in sync.
 function filteredProducts() {
   return state.products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(state.filters.search.toLowerCase());
-    const matchesCategory = state.filters.category === "All" || product.category === state.filters.category;
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(state.filters.search.toLowerCase());
+    const matchesCategory =
+      state.filters.category === "All" ||
+      product.category === state.filters.category;
     const matchesPrice =
       state.filters.price === "All" ||
       (state.filters.price === "under5" && product.price < 5) ||
-      (state.filters.price === "5to10" && product.price >= 5 && product.price <= 10) ||
+      (state.filters.price === "5to10" &&
+        product.price >= 5 &&
+        product.price <= 10) ||
       (state.filters.price === "over10" && product.price > 10);
     return matchesSearch && matchesCategory && matchesPrice;
   });
@@ -127,9 +148,10 @@ function renderProducts(targetId, products, limit = products.length) {
     return;
   }
 
-  target.innerHTML = list.map((product) => {
-    const wished = state.wishlist.includes(product.id);
-    return `
+  target.innerHTML = list
+    .map((product) => {
+      const wished = state.wishlist.includes(product.id);
+      return `
       <article class="product-card">
         <div class="product-media" role="button" tabindex="0" data-detail="${product.id}">
           <img src="${product.image}" alt="${product.name}" loading="lazy">
@@ -151,17 +173,22 @@ function renderProducts(targetId, products, limit = products.length) {
         </div>
       </article>
     `;
-  }).join("");
+    })
+    .join("");
   initIcons();
 }
 
 function renderCategories() {
-  qs("#categoryGrid").innerHTML = categories.map((category) => `
+  qs("#categoryGrid").innerHTML = categories
+    .map(
+      (category) => `
     <button class="category-card" data-category-shortcut="${category}">
       <span class="category-icon"><i data-lucide="${icons[category]}"></i></span>
       <span>${category}</span>
     </button>
-  `).join("");
+  `,
+    )
+    .join("");
 }
 
 // The cart lives in localStorage so the demo keeps quantities between refreshes.
@@ -169,7 +196,9 @@ function renderCart() {
   const cartItems = qs("#cartItems");
   const totalQty = state.cart.reduce((sum, item) => sum + item.qty, 0);
   const subtotal = state.cart.reduce((sum, item) => {
-    const product = state.products.find((candidate) => candidate.id === item.id);
+    const product = state.products.find(
+      (candidate) => candidate.id === item.id,
+    );
     return product ? sum + product.price * item.qty : sum;
   }, 0);
   const delivery = subtotal > 0 && subtotal < 40 ? 4.99 : 0;
@@ -186,10 +215,13 @@ function renderCart() {
     return;
   }
 
-  cartItems.innerHTML = state.cart.map((item) => {
-    const product = state.products.find((candidate) => candidate.id === item.id);
-    if (!product) return "";
-    return `
+  cartItems.innerHTML = state.cart
+    .map((item) => {
+      const product = state.products.find(
+        (candidate) => candidate.id === item.id,
+      );
+      if (!product) return "";
+      return `
       <div class="cart-item">
         <img src="${product.image}" alt="${product.name}">
         <div>
@@ -204,7 +236,8 @@ function renderCart() {
         <button class="icon-btn" data-remove="${product.id}" aria-label="Remove ${product.name}"><i data-lucide="trash-2"></i></button>
       </div>
     `;
-  }).join("");
+    })
+    .join("");
   initIcons();
 }
 
@@ -223,7 +256,8 @@ function updateCart(id, action) {
   if (!item) return;
   if (action === "inc") item.qty += 1;
   if (action === "dec") item.qty -= 1;
-  if (action === "remove" || item.qty <= 0) state.cart = state.cart.filter((candidate) => candidate.id !== id);
+  if (action === "remove" || item.qty <= 0)
+    state.cart = state.cart.filter((candidate) => candidate.id !== id);
   saveStore();
   renderCart();
 }
@@ -263,7 +297,9 @@ function openDetail(id) {
 }
 
 function renderAdmin() {
-  qs("#adminProductRows").innerHTML = state.products.map((product) => `
+  qs("#adminProductRows").innerHTML = state.products
+    .map(
+      (product) => `
     <tr>
       <td>${product.name}</td>
       <td>${product.category}</td>
@@ -276,7 +312,9 @@ function renderAdmin() {
         </div>
       </td>
     </tr>
-  `).join("");
+  `,
+    )
+    .join("");
   qs("#adminProductsCount").textContent = state.products.length;
   qs("#adminOrdersTotal").textContent = Math.max(18, state.cart.length + 18);
   initIcons();
@@ -296,11 +334,13 @@ function upsertProduct(event) {
     stock: Number(formData.get("stock")),
     image: formData.get("image").trim(),
     badge: formData.get("badge").trim() || "New",
-    description: formData.get("description").trim()
+    description: formData.get("description").trim(),
   };
 
   if (state.editingId) {
-    state.products = state.products.map((item) => item.id === state.editingId ? product : item);
+    state.products = state.products.map((item) =>
+      item.id === state.editingId ? product : item,
+    );
     showToast("Product updated");
   } else {
     state.products.unshift(product);
@@ -355,9 +395,12 @@ function renderCheckout() {
     initIcons();
     return;
   }
-  list.innerHTML = state.cart.map((item) => {
-    const product = state.products.find((candidate) => candidate.id === item.id);
-    return `
+  list.innerHTML = state.cart
+    .map((item) => {
+      const product = state.products.find(
+        (candidate) => candidate.id === item.id,
+      );
+      return `
       <div class="checkout-row">
         <div>
           <strong>${product.name}</strong>
@@ -366,7 +409,8 @@ function renderCheckout() {
         <strong>${money(product.price * item.qty)}</strong>
       </div>
     `;
-  }).join("");
+    })
+    .join("");
 }
 
 async function handleRegister(event) {
@@ -379,21 +423,25 @@ async function handleRegister(event) {
     email: formData.get("email").trim().toLowerCase(),
     password: formData.get("password"),
     phone: formData.get("phone").trim(),
-    address: formData.get("address").trim()
+    address: formData.get("address").trim(),
   };
 
   button.disabled = true;
   try {
     const data = await apiRequest("/register", {
       method: "POST",
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
     saveAuth(data.user, data.token);
     form.reset();
     showToast("Account created and saved to MySQL");
     navigate("homePage");
   } catch (error) {
-    showToast(error.message.includes("fetch") ? "Please start the Node.js server first" : error.message);
+    showToast(
+      error.message.includes("fetch")
+        ? "Please start the Node.js server first"
+        : error.message,
+    );
   } finally {
     button.disabled = false;
   }
@@ -406,21 +454,25 @@ async function handleLogin(event) {
   const formData = new FormData(form);
   const payload = {
     email: formData.get("email").trim().toLowerCase(),
-    password: formData.get("password")
+    password: formData.get("password"),
   };
 
   button.disabled = true;
   try {
     const data = await apiRequest("/login", {
       method: "POST",
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
     saveAuth(data.user, data.token);
     form.reset();
     showToast(`Welcome back, ${data.user.name}`);
     navigate("homePage");
   } catch (error) {
-    showToast(error.message.includes("fetch") ? "Please start the Node.js server first" : error.message);
+    showToast(
+      error.message.includes("fetch")
+        ? "Please start the Node.js server first"
+        : error.message,
+    );
   } finally {
     button.disabled = false;
   }
@@ -457,8 +509,14 @@ function startCountdown() {
 }
 
 function showSkeletons() {
-  qs("#featuredProducts").innerHTML = Array.from({ length: 8 }, () => `<div class="skeleton-card"></div>`).join("");
-  qs("#allProducts").innerHTML = Array.from({ length: 8 }, () => `<div class="skeleton-card"></div>`).join("");
+  qs("#featuredProducts").innerHTML = Array.from(
+    { length: 8 },
+    () => `<div class="skeleton-card"></div>`,
+  ).join("");
+  qs("#allProducts").innerHTML = Array.from(
+    { length: 8 },
+    () => `<div class="skeleton-card"></div>`,
+  ).join("");
 }
 
 function bindEvents() {
@@ -469,7 +527,14 @@ function bindEvents() {
     if (button.matches("a[href='#products'], a[href='#offers']")) {
       event.preventDefault();
       navigate("homePage");
-      setTimeout(() => qs(button.getAttribute("href")).scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+      setTimeout(
+        () =>
+          qs(button.getAttribute("href")).scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          }),
+        120,
+      );
     }
 
     if (button.matches("[data-page]")) {
@@ -478,14 +543,18 @@ function bindEvents() {
     }
 
     if (button.matches("[data-add]")) addToCart(Number(button.dataset.add));
-    if (button.matches("[data-inc]")) updateCart(Number(button.dataset.inc), "inc");
-    if (button.matches("[data-dec]")) updateCart(Number(button.dataset.dec), "dec");
-    if (button.matches("[data-remove]")) updateCart(Number(button.dataset.remove), "remove");
+    if (button.matches("[data-inc]"))
+      updateCart(Number(button.dataset.inc), "inc");
+    if (button.matches("[data-dec]"))
+      updateCart(Number(button.dataset.dec), "dec");
+    if (button.matches("[data-remove]"))
+      updateCart(Number(button.dataset.remove), "remove");
     if (button.matches("[data-wishlist]")) {
       event.stopPropagation();
       toggleWishlist(Number(button.dataset.wishlist));
     }
-    if (button.matches("[data-detail]")) openDetail(Number(button.dataset.detail));
+    if (button.matches("[data-detail]"))
+      openDetail(Number(button.dataset.detail));
     if (button.matches("[data-category-shortcut]")) {
       state.filters.category = button.dataset.categoryShortcut;
       qs("#categoryFilter").value = state.filters.category;
@@ -493,21 +562,35 @@ function bindEvents() {
       qs("#products").scrollIntoView({ behavior: "smooth", block: "start" });
       renderProducts("allProducts", filteredProducts());
     }
-    if (button.matches("[data-edit-product]")) editProduct(Number(button.dataset.editProduct));
-    if (button.matches("[data-delete-product]")) deleteProduct(Number(button.dataset.deleteProduct));
+    if (button.matches("[data-edit-product]"))
+      editProduct(Number(button.dataset.editProduct));
+    if (button.matches("[data-delete-product]"))
+      deleteProduct(Number(button.dataset.deleteProduct));
   });
 
-  qs("#cartToggle").addEventListener("click", () => qs("#cartDrawer").classList.add("open"));
-  qs("#closeCart").addEventListener("click", () => qs("#cartDrawer").classList.remove("open"));
-  qs("#menuToggle").addEventListener("click", () => qs("#mobileMenu").classList.toggle("open"));
-  qs("#closeModal").addEventListener("click", () => qs("#productModal").classList.remove("open"));
+  qs("#cartToggle").addEventListener("click", () =>
+    qs("#cartDrawer").classList.add("open"),
+  );
+  qs("#closeCart").addEventListener("click", () =>
+    qs("#cartDrawer").classList.remove("open"),
+  );
+  qs("#menuToggle").addEventListener("click", () =>
+    qs("#mobileMenu").classList.toggle("open"),
+  );
+  qs("#closeModal").addEventListener("click", () =>
+    qs("#productModal").classList.remove("open"),
+  );
   qs("#productModal").addEventListener("click", (event) => {
-    if (event.target.id === "productModal") qs("#productModal").classList.remove("open");
+    if (event.target.id === "productModal")
+      qs("#productModal").classList.remove("open");
   });
 
   qs("#themeToggle").addEventListener("click", () => {
     document.body.classList.toggle("dark");
-    localStorage.setItem("freshcart-theme", document.body.classList.contains("dark") ? "dark" : "light");
+    localStorage.setItem(
+      "freshcart-theme",
+      document.body.classList.contains("dark") ? "dark" : "light",
+    );
     initIcons();
   });
   qs("#logoutBtn").addEventListener("click", () => {
@@ -546,7 +629,8 @@ function bindEvents() {
 }
 
 function init() {
-  if (localStorage.getItem("freshcart-theme") === "dark") document.body.classList.add("dark");
+  if (localStorage.getItem("freshcart-theme") === "dark")
+    document.body.classList.add("dark");
   showSkeletons();
   renderCategories();
   bindEvents();

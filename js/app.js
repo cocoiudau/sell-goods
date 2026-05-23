@@ -434,7 +434,7 @@ async function handleRegister(event) {
     });
     saveAuth(data.user, data.token);
     form.reset();
-    showToast("Account created and saved to MySQL");
+    showToast("Account registration successful!");
     navigate("homePage");
   } catch (error) {
     showToast(

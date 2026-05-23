@@ -2,6 +2,8 @@ const state = {
   products: [...window.PRODUCTS_DATA],
   cart: JSON.parse(localStorage.getItem("freshcart-cart") || "[]"),
   wishlist: JSON.parse(localStorage.getItem("freshcart-wishlist") || "[]"),
+  token: localStorage.getItem("freshcart-token") || "",
+  currentUser: JSON.parse(localStorage.getItem("freshcart-user") || "null"),
   filters: {
     search: "",
     category: "All",
@@ -23,6 +25,7 @@ const icons = {
 const qs = (selector, scope = document) => scope.querySelector(selector);
 const qsa = (selector, scope = document) => [...scope.querySelectorAll(selector)];
 const money = (value) => `$${Number(value).toFixed(2)}`;
+const API_BASE = "http://localhost:3000/api";
 
 function saveStore() {
   localStorage.setItem("freshcart-cart", JSON.stringify(state.cart));
@@ -42,6 +45,53 @@ function showToast(message) {
   toast.textContent = message;
   area.appendChild(toast);
   setTimeout(() => toast.remove(), 2800);
+}
+
+async function apiRequest(path, options = {}) {
+  const response = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(state.token ? { Authorization: `Bearer ${state.token}` } : {}),
+      ...(options.headers || {})
+    }
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || "Server request failed.");
+  }
+
+  return data;
+}
+
+function saveAuth(user, token) {
+  state.currentUser = user;
+  state.token = token;
+  localStorage.setItem("freshcart-user", JSON.stringify(user));
+  localStorage.setItem("freshcart-token", token);
+  renderAuthState();
+}
+
+function clearAuth() {
+  state.currentUser = null;
+  state.token = "";
+  localStorage.removeItem("freshcart-user");
+  localStorage.removeItem("freshcart-token");
+  renderAuthState();
+}
+
+function renderAuthState() {
+  const loggedIn = Boolean(state.currentUser);
+  qs("#userChip").classList.toggle("hidden", !loggedIn);
+  qs("#logoutBtn").classList.toggle("hidden", !loggedIn);
+  qsa(".auth-link").forEach((link) => link.classList.toggle("hidden", loggedIn));
+
+  if (loggedIn) {
+    qs("#userName").textContent = state.currentUser.name;
+  }
+
+  initIcons();
 }
 
 function navigate(pageId) {
@@ -293,6 +343,13 @@ function refreshProductViews() {
 
 function renderCheckout() {
   const list = qs("#checkoutList");
+  const checkoutName = qs("#checkoutName");
+  const checkoutAddress = qs("#checkoutAddress");
+  if (state.currentUser) {
+    checkoutName.value = state.currentUser.name || "";
+    checkoutAddress.value = state.currentUser.address || "";
+  }
+
   if (!state.cart.length) {
     list.innerHTML = `<div class="empty-state"><div><i data-lucide="shopping-cart"></i><h3>No items yet</h3><p>Add groceries before checkout.</p></div></div>`;
     initIcons();
@@ -310,6 +367,76 @@ function renderCheckout() {
       </div>
     `;
   }).join("");
+}
+
+async function handleRegister(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const button = form.querySelector("button[type='submit']");
+  const formData = new FormData(form);
+  const payload = {
+    name: formData.get("name").trim(),
+    email: formData.get("email").trim().toLowerCase(),
+    password: formData.get("password"),
+    phone: formData.get("phone").trim(),
+    address: formData.get("address").trim()
+  };
+
+  button.disabled = true;
+  try {
+    const data = await apiRequest("/register", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    saveAuth(data.user, data.token);
+    form.reset();
+    showToast("Account created and saved to MySQL");
+    navigate("homePage");
+  } catch (error) {
+    showToast(error.message.includes("fetch") ? "Please start the Node.js server first" : error.message);
+  } finally {
+    button.disabled = false;
+  }
+}
+
+async function handleLogin(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const button = form.querySelector("button[type='submit']");
+  const formData = new FormData(form);
+  const payload = {
+    email: formData.get("email").trim().toLowerCase(),
+    password: formData.get("password")
+  };
+
+  button.disabled = true;
+  try {
+    const data = await apiRequest("/login", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    saveAuth(data.user, data.token);
+    form.reset();
+    showToast(`Welcome back, ${data.user.name}`);
+    navigate("homePage");
+  } catch (error) {
+    showToast(error.message.includes("fetch") ? "Please start the Node.js server first" : error.message);
+  } finally {
+    button.disabled = false;
+  }
+}
+
+async function restoreSession() {
+  renderAuthState();
+
+  if (!state.token) return;
+
+  try {
+    const data = await apiRequest("/me");
+    saveAuth(data.user, state.token);
+  } catch (error) {
+    clearAuth();
+  }
 }
 
 function startCountdown() {
@@ -383,6 +510,11 @@ function bindEvents() {
     localStorage.setItem("freshcart-theme", document.body.classList.contains("dark") ? "dark" : "light");
     initIcons();
   });
+  qs("#logoutBtn").addEventListener("click", () => {
+    clearAuth();
+    showToast("Logged out");
+    navigate("homePage");
+  });
 
   qs("#searchInput").addEventListener("input", (event) => {
     state.filters.search = event.target.value;
@@ -398,10 +530,8 @@ function bindEvents() {
   });
 
   qs("#adminForm").addEventListener("submit", upsertProduct);
-  qsa(".auth-form").forEach((form) => form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    showToast("Demo form submitted");
-  }));
+  qs("#registerForm").addEventListener("submit", handleRegister);
+  qs("#loginForm").addEventListener("submit", handleLogin);
   qs("#placeOrder").addEventListener("click", () => {
     if (!state.cart.length) {
       showToast("Your cart is empty");
@@ -420,6 +550,7 @@ function init() {
   showSkeletons();
   renderCategories();
   bindEvents();
+  restoreSession();
   startCountdown();
 
   setTimeout(() => {

@@ -11,15 +11,29 @@ const app = express();
 const port = process.env.PORT || 3000;
 const jwtSecret = process.env.JWT_SECRET || "freshcart_dev_secret";
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
-  port: Number(process.env.DB_PORT || 3306),
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "freshcart_db",
-  waitForConnections: true,
-  connectionLimit: 10,
-});
+function buildDatabaseConfig() {
+  const connectionUri = process.env.MYSQL_URL || process.env.DATABASE_URL;
+
+  if (connectionUri) {
+    return {
+      uri: connectionUri,
+      waitForConnections: true,
+      connectionLimit: 10,
+    };
+  }
+
+  return {
+    host: process.env.MYSQLHOST || process.env.DB_HOST || "localhost",
+    port: Number(process.env.MYSQLPORT || process.env.DB_PORT || 3306),
+    user: process.env.MYSQLUSER || process.env.DB_USER || "root",
+    password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || "",
+    database: process.env.MYSQLDATABASE || process.env.DB_NAME || "freshcart_db",
+    waitForConnections: true,
+    connectionLimit: 10,
+  };
+}
+
+const pool = mysql.createPool(buildDatabaseConfig());
 
 app.use(
   cors({
@@ -82,6 +96,39 @@ app.get("/api/health", (req, res) => {
   res.json({ ok: true, service: "FreshCart API" });
 });
 
+app.get("/api/db-health", async (req, res) => {
+  try {
+    await pool.query("SELECT 1");
+    res.json({ ok: true, database: "connected" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      ok: false,
+      message: databaseErrorMessage(error),
+    });
+  }
+});
+
+function databaseErrorMessage(error) {
+  if (error.code === "ER_NO_SUCH_TABLE") {
+    return "Database table `customers` does not exist. Please run server/schema.sql.";
+  }
+
+  if (error.code === "ER_BAD_DB_ERROR") {
+    return "Database does not exist. Please create `freshcart_db` or set MYSQLDATABASE/DB_NAME.";
+  }
+
+  if (error.code === "ECONNREFUSED") {
+    return "MySQL connection refused. Please check database host, port, and Railway MySQL service.";
+  }
+
+  if (error.code === "ER_ACCESS_DENIED_ERROR") {
+    return "MySQL access denied. Please check database username and password.";
+  }
+
+  return `Database error: ${error.code || "UNKNOWN"}`;
+}
+
 app.post("/api/register", async (req, res) => {
   const { name, email, password, phone = "", address = "" } = req.body;
 
@@ -128,7 +175,7 @@ app.post("/api/register", async (req, res) => {
     return res.status(201).json({ user, token: createToken(user) });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Could not register customer." });
+    return res.status(500).json({ message: databaseErrorMessage(error) });
   }
 });
 
@@ -159,7 +206,7 @@ app.post("/api/login", async (req, res) => {
     return res.json({ user: publicUser(user), token: createToken(user) });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Could not login." });
+    return res.status(500).json({ message: databaseErrorMessage(error) });
   }
 });
 
@@ -177,7 +224,7 @@ app.get("/api/me", requireAuth, async (req, res) => {
     return res.json({ user: rows[0] });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Could not load customer." });
+    return res.status(500).json({ message: databaseErrorMessage(error) });
   }
 });
 

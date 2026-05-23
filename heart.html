@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Heart Animation</title>
+  <style>
+    body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = 600;
+canvas.height = 600;
+
+const cx = 300, cy = 300, scale = 13;
+
+function hx(t) { return 16 * Math.pow(Math.sin(t), 3); }
+function hy(t) { return -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t)); }
+
+function drawMiniHeart(x, y, size, alpha, color) {
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+  ctx.fillStyle = color;
+  ctx.translate(x, y);
+  ctx.scale(size * 0.055, size * 0.055);
+  ctx.beginPath();
+  for (let i = 0; i <= 40; i++) {
+    const t = (i / 40) * 2 * Math.PI;
+    const px = hx(t) * 1.5;
+    const py = hy(t) * 1.5;
+    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+let particles = [];
+let frame = 0;
+
+function spawnParticle() {
+  const t = Math.random() * 2 * Math.PI;
+  const tx = cx + hx(t) * scale;
+  const ty = cy + hy(t) * scale;
+  const angle = Math.atan2(ty - cy, tx - cx);
+  const dist = Math.random() * 30 + 10;
+  const sx = cx + Math.cos(angle) * dist;
+  const sy = cy + Math.sin(angle) * dist;
+  const speed = Math.random() * 0.008 + 0.005;
+  const size = Math.random() * 6 + 4;
+  const pink = `rgb(${220 + (Math.random()*35|0)}, ${80 + (Math.random()*60|0)}, ${120 + (Math.random()*60|0)})`;
+  particles.push({ sx, sy, tx, ty, x: sx, y: sy, progress: 0, speed, size, color: pink, alpha: 0, life: 0 });
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  frame++;
+
+  if (frame % 3 === 0) {
+    for (let i = 0; i < 4; i++) spawnParticle();
+  }
+
+  particles = particles.filter(p => p.life < 180);
+
+  for (const p of particles) {
+    p.life++;
+    if (p.progress < 1) {
+      p.progress = Math.min(1, p.progress + p.speed);
+      const e = 1 - Math.pow(1 - p.progress, 3);
+      p.x = p.sx + (p.tx - p.sx) * e;
+      p.y = p.sy + (p.ty - p.sy) * e;
+      p.alpha = p.progress;
+    } else {
+      p.alpha = Math.max(0, 1 - (p.life - 120) / 60);
+      p.x += (Math.random() - 0.5) * 0.5;
+      p.y += (Math.random() - 0.5) * 0.5;
+    }
+    drawMiniHeart(p.x, p.y, p.size, p.alpha, p.color);
+  }
+
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>

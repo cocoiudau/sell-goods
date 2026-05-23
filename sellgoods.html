@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="FreshCart is a modern responsive grocery e-commerce demo with cart, filters, authentication screens, checkout, and admin dashboard.">
+  <title>FreshCart Grocery</title>
+  <link rel="stylesheet" href="css/sellgoods.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+  <script src="data/products.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <nav class="navbar" aria-label="Primary navigation">
+      <div class="nav-inner">
+        <a href="#" class="brand" data-page="homePage" aria-label="FreshCart home">
+          <span class="brand-mark"><i data-lucide="leaf"></i></span>
+          <span>FreshCart</span>
+        </a>
+
+        <div class="nav-links" id="mobileMenu">
+          <a href="#" class="nav-link active" data-page="homePage">Home</a>
+          <a href="#products" class="nav-link">Products</a>
+          <a href="#" class="nav-link" data-page="loginPage">Login</a>
+          <a href="#" class="nav-link" data-page="registerPage">Register</a>
+          <a href="#" class="nav-link" data-page="adminPage">Admin</a>
+        </div>
+
+        <div class="nav-actions">
+          <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode"><i data-lucide="moon"></i></button>
+          <button class="cart-btn" id="cartToggle" aria-label="Open cart">
+            <i data-lucide="shopping-cart"></i>
+            <span class="cart-count" id="cartCount">0</span>
+          </button>
+          <button class="hamburger" id="menuToggle" aria-label="Open mobile menu"><i data-lucide="menu"></i></button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <section class="page active" id="homePage">
+        <header class="hero">
+          <div class="hero-inner">
+            <div class="hero-copy">
+              <p class="eyebrow">Fresh groceries delivered today</p>
+              <h1>Stock your kitchen with market-fresh favorites.</h1>
+              <p>Shop produce, pantry staples, drinks, seafood, and household essentials with fast local delivery and weekly supermarket deals.</p>
+              <div class="hero-actions">
+                <a href="#products" class="btn btn-primary"><i data-lucide="shopping-bag"></i>Shop now</a>
+                <a href="#offers" class="btn btn-secondary"><i data-lucide="badge-percent"></i>View offers</a>
+              </div>
+            </div>
+
+            <aside class="hero-card" aria-label="Delivery preview">
+              <div class="delivery-row">
+                <div>
+                  <strong>Today delivery</strong>
+                  <span>Arrives between 4:00 - 6:00 PM</span>
+                </div>
+                <i data-lucide="truck"></i>
+              </div>
+              <div class="hero-card-list">
+                <div class="mini-product">
+                  <img src="https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=300&q=80" alt="Bananas">
+                  <div><strong>Golden Bananas</strong><span>2 bunches</span></div>
+                </div>
+                <div class="mini-product">
+                  <img src="https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=300&q=80" alt="Salmon fillet">
+                  <div><strong>Atlantic Salmon</strong><span>Fresh cut</span></div>
+                </div>
+              </div>
+              <div class="hero-total">
+                <span>Sample basket</span>
+                <strong>$22.43</strong>
+              </div>
+            </aside>
+          </div>
+        </header>
+
+        <div class="stats-strip" aria-label="Store highlights">
+          <div class="stat-pill"><strong>18k+</strong><span>Happy customers</span></div>
+          <div class="stat-pill"><strong>2h</strong><span>Fast delivery</span></div>
+          <div class="stat-pill"><strong>900+</strong><span>Fresh items</span></div>
+          <div class="stat-pill"><strong>4.8</strong><span>Average rating</span></div>
+        </div>
+
+        <section class="section" aria-labelledby="featuredTitle">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Picked for you</p>
+              <h2 id="featuredTitle">Featured products</h2>
+            </div>
+            <a href="#products" class="btn btn-ghost"><i data-lucide="arrow-right"></i>Browse all</a>
+          </div>
+          <div class="products-grid skeleton-grid" id="featuredProducts" aria-live="polite"></div>
+        </section>
+
+        <section class="section" aria-labelledby="categoriesTitle">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Shop by aisle</p>
+              <h2 id="categoriesTitle">Categories</h2>
+            </div>
+          </div>
+          <div class="category-grid" id="categoryGrid"></div>
+        </section>
+
+        <section class="section" id="offers" aria-labelledby="offersTitle">
+          <div class="offer-band">
+            <div>
+              <p class="eyebrow">Weekend harvest sale</p>
+              <h2 id="offersTitle">Save up to 30% on fresh produce bundles.</h2>
+              <p>Build a colorful basket with fruits, vegetables, snacks, and family essentials before the promotion ends.</p>
+              <a href="#products" class="btn btn-secondary"><i data-lucide="ticket-percent"></i>Claim discount</a>
+            </div>
+            <div class="countdown" aria-label="Promotional countdown">
+              <div class="time-box"><strong id="days">00</strong><span>Days</span></div>
+              <div class="time-box"><strong id="hours">00</strong><span>Hours</span></div>
+              <div class="time-box"><strong id="minutes">00</strong><span>Min</span></div>
+              <div class="time-box"><strong id="seconds">00</strong><span>Sec</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="products" aria-labelledby="productsTitle">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Fresh catalog</p>
+              <h2 id="productsTitle">All groceries</h2>
+            </div>
+          </div>
+          <div class="product-tools">
+            <div class="input-wrap">
+              <i data-lucide="search"></i>
+              <input class="input" id="searchInput" type="search" placeholder="Search products by name">
+            </div>
+            <select class="select" id="categoryFilter" aria-label="Filter by category">
+              <option>All</option>
+              <option>Vegetables</option>
+              <option>Fruits</option>
+              <option>Drinks</option>
+              <option>Snacks</option>
+              <option>Meat & Seafood</option>
+              <option>Household items</option>
+            </select>
+            <select class="select" id="priceFilter" aria-label="Filter by price">
+              <option value="All">All prices</option>
+              <option value="under5">Under $5</option>
+              <option value="5to10">$5 to $10</option>
+              <option value="over10">Over $10</option>
+            </select>
+          </div>
+          <div class="products-grid skeleton-grid" id="allProducts" aria-live="polite"></div>
+        </section>
+
+        <section class="section" aria-labelledby="reviewsTitle">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Customer reviews</p>
+              <h2 id="reviewsTitle">Loved by busy households</h2>
+            </div>
+          </div>
+          <div class="reviews-grid">
+            <article class="review-card">
+              <p>"The produce feels hand-picked and the cart is so easy to adjust. My weekly shopping now takes minutes."</p>
+              <div class="reviewer"><span class="avatar">AN</span><div><strong>Anna Nguyen</strong><br><span>Home chef</span></div></div>
+            </article>
+            <article class="review-card">
+              <p>"Great deals, clean checkout, and reliable delivery windows. The seafood quality surprised me."</p>
+              <div class="reviewer"><span class="avatar">JR</span><div><strong>James Rivera</strong><br><span>Parent of three</span></div></div>
+            </article>
+            <article class="review-card">
+              <p>"I use the wishlist for staples and reorder fast. It feels like a premium supermarket in my pocket."</p>
+              <div class="reviewer"><span class="avatar">MP</span><div><strong>Maya Patel</strong><br><span>Designer</span></div></div>
+            </article>
+          </div>
+        </section>
+      </section>
+
+      <section class="page" id="loginPage">
+        <div class="form-page">
+          <div class="form-panel">
+            <p class="eyebrow">Welcome back</p>
+            <h2>Login to FreshCart</h2>
+            <form class="auth-form">
+              <label>Email<input class="input" type="email" placeholder="you@example.com" required></label>
+              <label>Password<input class="input" type="password" placeholder="Enter password" required></label>
+              <button class="btn btn-primary" type="submit"><i data-lucide="log-in"></i>Login</button>
+            </form>
+            <p class="form-switch">New here? <button data-page="registerPage">Create account</button></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="registerPage">
+        <div class="form-page">
+          <div class="form-panel">
+            <p class="eyebrow">Join FreshCart</p>
+            <h2>Create your account</h2>
+            <form class="auth-form">
+              <label>Full name<input class="input" type="text" placeholder="Your name" required></label>
+              <label>Email<input class="input" type="email" placeholder="you@example.com" required></label>
+              <label>Password<input class="input" type="password" placeholder="Create password" required></label>
+              <button class="btn btn-primary" type="submit"><i data-lucide="user-plus"></i>Register</button>
+            </form>
+            <p class="form-switch">Already registered? <button data-page="loginPage">Login</button></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="adminPage">
+        <div class="admin-layout">
+          <p class="eyebrow">Demo dashboard</p>
+          <h2>Store administration</h2>
+          <div class="admin-grid">
+            <div class="stat-card"><i data-lucide="package"></i><div><strong id="adminProductsCount">0</strong><span>Products</span></div></div>
+            <div class="stat-card"><i data-lucide="receipt"></i><div><strong id="adminOrdersTotal">18</strong><span>Orders</span></div></div>
+            <div class="stat-card"><i data-lucide="dollar-sign"></i><div><strong>$6.8k</strong><span>Revenue</span></div></div>
+            <div class="stat-card"><i data-lucide="users"></i><div><strong>1.2k</strong><span>Customers</span></div></div>
+          </div>
+
+          <div class="admin-columns">
+            <section class="admin-panel" aria-labelledby="adminFormTitle">
+              <h3 id="adminFormTitle">Add or edit product</h3>
+              <form class="admin-form" id="adminForm">
+                <label>Name<input class="input" name="name" required></label>
+                <label>Category
+                  <select class="select" name="category" required>
+                    <option>Vegetables</option>
+                    <option>Fruits</option>
+                    <option>Drinks</option>
+                    <option>Snacks</option>
+                    <option>Meat & Seafood</option>
+                    <option>Household items</option>
+                  </select>
+                </label>
+                <label>Price<input class="input" name="price" type="number" step="0.01" min="0" required></label>
+                <label>Old price<input class="input" name="oldPrice" type="number" step="0.01" min="0" required></label>
+                <label>Rating<input class="input" name="rating" type="number" step="0.1" min="1" max="5" value="4.7" required></label>
+                <label>Stock<input class="input" name="stock" type="number" min="0" value="20" required></label>
+                <label>Badge<input class="input" name="badge" placeholder="Fresh"></label>
+                <label>Image URL<input class="input" name="image" placeholder="https://..." required></label>
+                <label>Description<textarea name="description" rows="4" required></textarea></label>
+                <button class="btn btn-primary" type="submit"><i data-lucide="save"></i><span id="adminSubmitText">Add product</span></button>
+              </form>
+            </section>
+
+            <section class="admin-panel" aria-labelledby="adminProductTitle">
+              <h3 id="adminProductTitle">Product inventory</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
+                  <tbody id="adminProductRows"></tbody>
+                </table>
+              </div>
+              <h3>Recent orders</h3>
+              <div class="order-list">
+                <div class="order-item"><div><strong>#FC-1048</strong><br><span>9 items · Anna Nguyen</span></div><span class="status">Packing</span></div>
+                <div class="order-item"><div><strong>#FC-1047</strong><br><span>4 items · James Rivera</span></div><span class="status">Delivered</span></div>
+                <div class="order-item"><div><strong>#FC-1046</strong><br><span>12 items · Maya Patel</span></div><span class="status">On route</span></div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="checkoutPage">
+        <div class="checkout-panel">
+          <p class="eyebrow">Secure checkout</p>
+          <h2>Review your order</h2>
+          <div class="checkout-grid">
+            <div>
+              <h3>Delivery details</h3>
+              <form class="admin-form">
+                <label>Name<input class="input" placeholder="Your name"></label>
+                <label>Address<input class="input" placeholder="Street, city, apartment"></label>
+                <label>Delivery note<textarea rows="4" placeholder="Leave at door, call on arrival..."></textarea></label>
+              </form>
+            </div>
+            <div>
+              <h3>Order summary</h3>
+              <div class="checkout-list" id="checkoutList"></div>
+              <button class="btn btn-primary" id="placeOrder" type="button"><i data-lucide="credit-card"></i>Place demo order</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="drawer" id="cartDrawer" aria-label="Shopping cart">
+      <div class="drawer-header">
+        <h3>Your cart</h3>
+        <button class="icon-btn" id="closeCart" aria-label="Close cart"><i data-lucide="x"></i></button>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="drawer-footer">
+        <div class="cart-summary">
+          <div class="summary-row"><span>Subtotal</span><strong id="cartSubtotal">$0.00</strong></div>
+          <div class="summary-row"><span>Delivery</span><strong id="cartDelivery">Free</strong></div>
+          <div class="summary-row total"><span>Total</span><strong id="cartTotal">$0.00</strong></div>
+        </div>
+        <button class="btn btn-primary" data-page="checkoutPage"><i data-lucide="arrow-right"></i>Checkout</button>
+      </div>
+    </aside>
+
+    <div class="modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="modalTitle">Product detail</h3>
+          <button class="icon-btn" id="closeModal" aria-label="Close product details"><i data-lucide="x"></i></button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <div>
+          <h3>FreshCart</h3>
+          <p>Modern groceries, bright produce, and everyday essentials delivered with care.</p>
+        </div>
+        <div>
+          <h3>Contact</h3>
+          <p>hello@freshcart.demo</p>
+          <p>+1 555 012 4412</p>
+        </div>
+        <div>
+          <h3>Store</h3>
+          <a href="#products">Products</a>
+          <a href="#offers">Offers</a>
+          <a href="#" data-page="checkoutPage">Checkout</a>
+        </div>
+        <div>
+          <h3>Hours</h3>
+          <p>Mon - Sat: 8:00 AM - 9:00 PM</p>
+          <p>Sun: 9:00 AM - 7:00 PM</p>
+        </div>
+      </div>
+    </footer>
+
+    <div class="toast-area" id="toastArea" aria-live="polite"></div>
+  </div>
+</body>
+</html>

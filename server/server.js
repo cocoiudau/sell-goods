@@ -18,18 +18,28 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD || "",
   database: process.env.DB_NAME || "freshcart_db",
   waitForConnections: true,
-  connectionLimit: 10
+  connectionLimit: 10,
 });
 
-app.use(cors({
-  origin: ["http://127.0.0.1:5500", "http://localhost:5500", `http://localhost:${port}`, `http://127.0.0.1:${port}`],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      "http://127.0.0.1:5500",
+      "http://localhost:5500",
+      `http://localhost:${port}`,
+      `http://127.0.0.1:${port}`,
+      "https://cocoiudau.github.io",
+    ],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..")));
 
 function createToken(user) {
-  return jwt.sign({ id: user.id, email: user.email }, jwtSecret, { expiresIn: "7d" });
+  return jwt.sign({ id: user.id, email: user.email }, jwtSecret, {
+    expiresIn: "7d",
+  });
 }
 
 function publicUser(row) {
@@ -38,14 +48,14 @@ function publicUser(row) {
     name: row.name,
     email: row.email,
     phone: row.phone,
-    address: row.address
+    address: row.address,
   };
 }
 
 async function findCustomerByEmail(email) {
   const [rows] = await pool.execute(
     "SELECT id, name, email, password_hash, phone, address FROM customers WHERE email = ? LIMIT 1",
-    [email]
+    [email],
   );
   return rows[0];
 }
@@ -62,7 +72,9 @@ function requireAuth(req, res, next) {
     req.user = jwt.verify(token, jwtSecret);
     return next();
   } catch (error) {
-    return res.status(401).json({ message: "Login token is invalid or expired." });
+    return res
+      .status(401)
+      .json({ message: "Login token is invalid or expired." });
   }
 }
 
@@ -74,23 +86,35 @@ app.post("/api/register", async (req, res) => {
   const { name, email, password, phone = "", address = "" } = req.body;
 
   if (!name || !email || !password) {
-    return res.status(400).json({ message: "Name, email, and password are required." });
+    return res
+      .status(400)
+      .json({ message: "Name, email, and password are required." });
   }
 
   if (password.length < 6) {
-    return res.status(400).json({ message: "Password must be at least 6 characters." });
+    return res
+      .status(400)
+      .json({ message: "Password must be at least 6 characters." });
   }
 
   try {
     const existing = await findCustomerByEmail(email);
     if (existing) {
-      return res.status(409).json({ message: "This email is already registered. Please login." });
+      return res
+        .status(409)
+        .json({ message: "This email is already registered. Please login." });
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
     const [result] = await pool.execute(
       "INSERT INTO customers (name, email, password_hash, phone, address) VALUES (?, ?, ?, ?, ?)",
-      [name.trim(), email.trim().toLowerCase(), passwordHash, phone.trim(), address.trim()]
+      [
+        name.trim(),
+        email.trim().toLowerCase(),
+        passwordHash,
+        phone.trim(),
+        address.trim(),
+      ],
     );
 
     const user = {
@@ -98,7 +122,7 @@ app.post("/api/register", async (req, res) => {
       name: name.trim(),
       email: email.trim().toLowerCase(),
       phone: phone.trim(),
-      address: address.trim()
+      address: address.trim(),
     };
 
     return res.status(201).json({ user, token: createToken(user) });
@@ -112,18 +136,24 @@ app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: "Email and password are required." });
+    return res
+      .status(400)
+      .json({ message: "Email and password are required." });
   }
 
   try {
     const user = await findCustomerByEmail(email.trim().toLowerCase());
     if (!user) {
-      return res.status(401).json({ message: "Email or password is incorrect." });
+      return res
+        .status(401)
+        .json({ message: "Email or password is incorrect." });
     }
 
     const validPassword = await bcrypt.compare(password, user.password_hash);
     if (!validPassword) {
-      return res.status(401).json({ message: "Email or password is incorrect." });
+      return res
+        .status(401)
+        .json({ message: "Email or password is incorrect." });
     }
 
     return res.json({ user: publicUser(user), token: createToken(user) });
@@ -137,7 +167,7 @@ app.get("/api/me", requireAuth, async (req, res) => {
   try {
     const [rows] = await pool.execute(
       "SELECT id, name, email, phone, address FROM customers WHERE id = ? LIMIT 1",
-      [req.user.id]
+      [req.user.id],
     );
 
     if (!rows[0]) {

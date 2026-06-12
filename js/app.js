@@ -136,7 +136,7 @@ const DELIVERY_FEE = 25000;
 const API_BASE =
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? `${window.location.protocol}//${window.location.hostname}:${window.location.port === "5500" || !window.location.port ? "3000" : window.location.port}/api`
-    : "https://sell-goods-production.up.railway.app/api";
+    : atob("aHR0cHM6Ly9zZWxsLWdvb2RzLXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHAvYXBp");
 
 function t(key) {
   return translations[state.lang][key] || translations.vi[key] || key;

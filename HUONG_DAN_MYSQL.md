@@ -73,7 +73,7 @@ http://localhost:3000/
 Trang GitHub Pages trong `js/app.js` dang goi:
 
 ```text
-https://sell-goods-production.up.railway.app/api
+https://<ten-project-cua-ban>.up.railway.app/api
 ```
 
 Neu `/api/health` chay duoc nhung dang ky bao loi database, hay kiem tra:
@@ -85,7 +85,7 @@ Neu `/api/health` chay duoc nhung dang ky bao loi database, hay kiem tra:
 5. Sau khi sua `server/server.js`, can redeploy Railway. Kiem tra:
 
 ```text
-https://sell-goods-production.up.railway.app/api/db-health
+https://<ten-project-cua-ban>.up.railway.app/api/db-health
 ```
 
 Neu tra ve `{"ok":true,"database":"connected"}` thi dang ky moi luu duoc vao MySQL.

@@ -132,7 +132,19 @@ function databaseErrorMessage(error) {
 app.post("/api/register", async (req, res) => {
   const { name, email, password, phone = "", address = "" } = req.body;
 
-  if (!name || !email || !password) {
+  if (
+    typeof name !== "string" ||
+    typeof email !== "string" ||
+    typeof password !== "string" ||
+    typeof phone !== "string" ||
+    typeof address !== "string"
+  ) {
+    return res
+      .status(400)
+      .json({ message: "Invalid input types. Name, email, password, phone, and address must be strings." });
+  }
+
+  if (!name.trim() || !email.trim() || !password) {
     return res
       .status(400)
       .json({ message: "Name, email, and password are required." });
@@ -182,7 +194,13 @@ app.post("/api/register", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
+  if (typeof email !== "string" || typeof password !== "string") {
+    return res
+      .status(400)
+      .json({ message: "Email and password must be strings." });
+  }
+
+  if (!email.trim() || !password) {
     return res
       .status(400)
       .json({ message: "Email and password are required." });

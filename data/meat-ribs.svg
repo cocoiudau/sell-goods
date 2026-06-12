@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480">
+  <rect width="640" height="480" rx="32" fill="#fff8f6"/>
+  <rect x="92" y="82" width="456" height="316" rx="28" fill="#ffffff" stroke="#eadbd8" stroke-width="8"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M174 306c44-82 104-138 180-166" stroke="#da7371" stroke-width="48"/>
+    <path d="M250 320c32-85 84-148 156-188" stroke="#c8565d" stroke-width="48"/>
+    <path d="M334 320c20-75 61-132 122-170" stroke="#e58f85" stroke-width="48"/>
+    <path d="M174 306c44-82 104-138 180-166" stroke="#fff0ed" stroke-width="16"/>
+    <path d="M250 320c32-85 84-148 156-188" stroke="#fff0ed" stroke-width="16"/>
+    <path d="M334 320c20-75 61-132 122-170" stroke="#fff0ed" stroke-width="16"/>
+  </g>
+  <text x="320" y="426" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#9c3c40">Sườn non heo</text>
+</svg>
